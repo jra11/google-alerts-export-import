@@ -19,7 +19,12 @@ var casper = require('casper').create({
 	verbose: true,
     logLevel: "error"
 });
+
 casper.start("", function() {});
+casper.page.customHeaders = {
+	'Accept-Language': 'en'
+};
+
 var fs = require('fs');
 var utils = require('utils');
 
