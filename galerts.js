@@ -314,12 +314,12 @@ casper.updateAlertIfNeeded = function(id, alert) {
 	this.wait(1000, function() {
 		rows = this.getElementsInfo('.goog-flat-menu-button-caption');
 
-		if (rows[5].html != alert['deliverto']) { this.changeDropDown(6, alert['deliverto']); updated = true; }
-		if (rows[0].html != alert['howoften']) { this.changeDropDown(1, alert['howoften']); updated = true; }
+		if (rows[5].html != alert['deliverto']) { this.changeDropDown(6, 'deliverto', alert['deliverto']); updated = true; }
+		if (rows[0].html != alert['howoften']) { this.changeDropDown(1, 'howoften', alert['howoften']); updated = true; }
 		if (rows[1].html != alert['sources'].join(', ')) { this.changeDropDownMultiSelect(2, alert['sources'], rows[1].html); updated = true; }
-		if (rows[2].html != alert['language']) { this.changeDropDown(3, alert['language']); updated = true; }
-		if (rows[3].html != alert['region']) { this.changeDropDown(4, alert['region']); updated = true; }
-		if (rows[4].html != alert['howmany']) { this.changeDropDown(5, alert['howmany']); updated = true; }		
+		if (rows[2].html != alert['language']) { this.changeDropDown(3, 'language', alert['language']); updated = true; }
+		if (rows[3].html != alert['region']) { this.changeDropDown(4, 'region', alert['region']); updated = true; }
+		if (rows[4].html != alert['howmany']) { this.changeDropDown(5, 'howmany', alert['howmany']); updated = true; }		
 	});
 
 	this.then(function() {
@@ -379,37 +379,56 @@ casper.changeDropDownMultiSelect = function(indexDropdownMenu, newvalues, oldval
 	});
 }
 
-casper.changeDropDown = function(indexDropdownMenu, newvalue) {
+/**
+* We "type" the first letter N times to get the right value from any dropdown list (more reliable than mouse manipulation)
+*/
+casper.getIndexItemByFirstLetter = function(menuname, itemwanted) {
+
+	var firstletter = itemwanted.charAt(0);
+	var index = 0;
+	gaData[menuname].forEach(function(el){ 
+		if (el.charAt(0) == firstletter) {
+			index += 1;
+		}
+	});
+
+	return index-1;
+}
+
+casper.changeDropDown = function(indexDropdownMenu, menuName, newvalue) {
 	// Short function, but really tricky... 
 
-	// Google puts a space between some fields (weird)
+	//indexDropdownMenu = 3; menuName = "language"; newvalue = "Polish";
 	if ((newvalue == "All results")||(newvalue == "Only the best results")) { newvalue = " "+newvalue; }
-	
-	// Click on the dropdown to display it
+
+	//Click on the dropdown to display it
 	this.then(function () {
-		this.log("Changing Dropdown "+indexDropdownMenu+ " of alert to "+newvalue, "debug");
+		this.log("Changing Dropdown "+indexDropdownMenu+ " ("+ menuName+") of alert to "+newvalue, "debug");
 		this.click(x('(//*/div[@class="goog-inline-block goog-flat-menu-button-caption"])['+indexDropdownMenu+']'));
 	});
-	
-	
-	// Move the mouse to the targeted menu item - needed as Google JS changes on mouse move
-	this.then(function() {
-		//var xpath = '(//body/div[@class="goog-menu goog-menu-noicon"])['+(indexDropdownMenu)+']/*[@class="goog-menuitem"]/*[text()="'+newvalue+'"]/..';
-		var xpath = '//*/div[contains(@class, "goog-menuitem")]/*[text()="'+newvalue+'"]/..';
-		this.mouse.move(x(xpath));
-	});
-	
-	
-	// Click on the highlighted menu item
-	this.then(function() {
-		var xpath = '//*/div[contains(@class, "goog-menuitem")]/*[text()="'+newvalue+'"]/..';
-		this.mouse.click(x(xpath));
+
+	// We use the keyboard - not the mouse
+	this.then(function () {
+		var nKeypressNeeded = casper.getIndexItemByFirstLetter(menuName, newvalue);
+		var keyToPress = newvalue.charAt(0);
+		this.log("Selecting right item in menu "+menuName+ " by pressing "+nKeypressNeeded+" time on "+keyToPress, "debug");
+		for (var i=1; i<=nKeypressNeeded; i++) {
+			this.sendKeys(x('(//*/div[@class="goog-inline-block goog-flat-menu-button-caption"])['+indexDropdownMenu+']'), keyToPress);
+		}
 	});
 
-	// this.wait(2000, function() {
-	//  	this.capture('test_dropdown3_'+newvalue+'.jpg');
+	// Enter to select the item
+	this.then(function() {
+		this.sendKeys(x('(//*/div[@class="goog-inline-block goog-flat-menu-button-caption"])['+indexDropdownMenu+']'), casper.page.event.key.Enter);
+	});
+
+	this.wait(2000, function() {
+		this.capture('test'+menuName+'.jpg');
+	});
+
+	// this.then(function() {
+	// this.exit();
 	// });
-
 }
 
 casper.addAlert = function(alert) {
