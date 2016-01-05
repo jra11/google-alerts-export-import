@@ -1,14 +1,16 @@
 var version = 1.1;
-
-var gaDataMod = require('./galertsData.js');
-var confMod = require('./config.js');
-
-var columns_csv = ["keyword", "howoften", "sources", "language", "region", "howmany", "deliverto", "rss"];
-var gaData = gaDataMod.getVars();
-var conf = confMod.getConfig();
-
-
+var fs = require('fs');
+var utils = require('utils');
+var gaData = require('./galertsData.js').getVars();
+var conf = require('./config.js').getConfig();
 gaData['deliverto'][0] = conf['email'];
+
+if (fs.exists("config.mine.js")) {
+	conf = require('./config.mine.js').getConfig();
+	gaData['deliverto'][0] = conf['email'];
+}
+var columns_csv = ["keyword", "howoften", "sources", "language", "region", "howmany", "deliverto", "rss"];
+
 
 var url = "https://www.google.com/alerts";
 var urllogin = "https://accounts.google.com/ServiceLogin";
@@ -17,7 +19,7 @@ var loginString = "ServiceLogin";
 
 var casper = require('casper').create({
 	verbose: true,
-    logLevel: "error"
+    logLevel: conf['loglevel'],
 });
 
 casper.start("", function() {});
@@ -25,13 +27,6 @@ casper.page.customHeaders = {
 	'Accept-Language': 'en'
 };
 
-var fs = require('fs');
-var utils = require('utils');
-
-if (fs.exists("config.mine.js")) {
-	conf = require('./config.mine.js').getConfig();
-	gaData['deliverto'][0] = conf['email'];
-}
 
 if (conf['email'] == "") {
 	casper.log("Galerts is not configured. Please edit the config file before use", "error");
