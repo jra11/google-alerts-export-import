@@ -1,7 +1,7 @@
 var require = patchRequire(require);
 var conf = {};
 
-
+conf['loglevel'] = "error";
 
 conf['email'] = "";
 conf['password'] = "";

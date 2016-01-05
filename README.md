@@ -5,6 +5,7 @@ A tool to export and import Google Alerts in your account
 
 This tool enables you to export and import massively Google Alerts in your Google account to set up a good internet monitoring system. As Google Alerts does not have any API, this script aims at providing an easy way to import/export from Google Alerts.
 
+
 ### Why CasperJS?
 
 The script has been made using CasperJS, which should be the most reliable solution to automate Google things, as they use massively Javascript. Another project has been made here using Python/URLlib/BeautifulSoup:
@@ -71,6 +72,7 @@ To know which value each field can take, please have a look in the file "galerts
 So for instance, the two following lines are correct:
 
 > Apple;At most once a week;Blogs;English;Argentina;All results;RSS feed
+
 > iPhone;At most once a day;Web//Video;French;Any Region;All results;test@youremail.com
 
 There is only one multiselect field: the "sources" one, which can take several values. To separate each one, use the separator '//' (eg Web//Video as above). 
@@ -100,14 +102,22 @@ will become:
 
 * If you want to contribute, clone the GIT file and customize the config file with the name "config.mine.js" - without editing the default config.js — and exclude config.mine.js from GIT
 
-* To enable debugging/verbose logs, change log level at line 21 of galerts.js
+* To enable debugging/verbose logs, change log level in config.js or config.mine.js
 
 ```
-var casper = require('casper').create({
-	verbose: true,
-    logLevel: "debug"
+conf['loglevel'] = "error";
+// or
+conf['loglevel'] = "debug";
+```
+
+* One of the best way to debug is to take screenshots:
+
+```
+this.wait(2000, function() {
+ 	this.capture('test.jpg');
 });
 ```
+
 
 ### Bugs/Limitations
 
@@ -119,6 +129,7 @@ var casper = require('casper').create({
 
 * If you have a warning "Unsafe JavaScript attempt to access frame with URL about:blank", do not take it into account, this seems to be a bug in PhantomJS. 
 
+* If you have some SSL errors, try the option casperjs --ssl-protocol=tlsv1 --ignore-ssl-errors=yes galerts.js
 
 ### Responsability
 

@@ -422,9 +422,9 @@ casper.changeDropDown = function(indexDropdownMenu, menuName, newvalue) {
 		this.sendKeys(x('(//*/div[@class="goog-inline-block goog-flat-menu-button-caption"])['+indexDropdownMenu+']'), casper.page.event.key.Enter);
 	});
 
-	this.wait(2000, function() {
-		this.capture('test'+menuName+'.jpg');
-	});
+	// this.wait(2000, function() {
+	// 	this.capture('test'+menuName+'.jpg');
+	// });
 
 	// this.then(function() {
 	// this.exit();
