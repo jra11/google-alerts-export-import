@@ -313,13 +313,13 @@ casper.updateAlertIfNeeded = function(id, alert) {
 	}
 	this.wait(1000, function() {
 		rows = this.getElementsInfo('.goog-flat-menu-button-caption');
-		
+
+		if (rows[5].html != alert['deliverto']) { this.changeDropDown(6, alert['deliverto']); updated = true; }
 		if (rows[0].html != alert['howoften']) { this.changeDropDown(1, alert['howoften']); updated = true; }
 		if (rows[1].html != alert['sources'].join(', ')) { this.changeDropDownMultiSelect(2, alert['sources'], rows[1].html); updated = true; }
 		if (rows[2].html != alert['language']) { this.changeDropDown(3, alert['language']); updated = true; }
 		if (rows[3].html != alert['region']) { this.changeDropDown(4, alert['region']); updated = true; }
-		if (rows[4].html != alert['howmany']) { this.changeDropDown(5, alert['howmany']); updated = true; }
-		if (rows[5].html != alert['deliverto']) { this.changeDropDown(6, alert['deliverto']); updated = true; }
+		if (rows[4].html != alert['howmany']) { this.changeDropDown(5, alert['howmany']); updated = true; }		
 	});
 
 	this.then(function() {
