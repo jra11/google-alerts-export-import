@@ -60,7 +60,7 @@ casper.parseCommandLine = function() {
 	casper.cli.drop("casper-path");
 	
 	if (casper.cli.args.length === 0) {
-		casper.echo('No argument passed, "casperjs galerts.js help" for help');
+		help();
 		casper.exit();
 	} 
 
