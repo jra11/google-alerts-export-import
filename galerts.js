@@ -290,13 +290,29 @@ casper.getCurrentAlert = function(id, keyword, rssLink, callback) {
 	return this;
 }
 
+//http://stackoverflow.com/questions/13482352/xquery-looking-for-text-with-single-quote
+function cleanStringForXpath(str)  {
+    var parts  = str.match(/[^'"]+|['"]/g);
+    parts = parts.map(function(part){
+        if (part === "'")  {
+            return '"\'"'; // output "'"
+        }
+
+        if (part === '"') {
+            return "'\"'"; // output '"'
+        }
+        return "'" + part + "'";
+    });
+    return "concat(" + parts.join(",") + ")";
+
+}
+
 casper.deleteAlert = function(alert) {
 	this.then(function(){ 
 		this.showAllAlerts();
 	});
 	this.then(function(){ 
-		var xpath = '//*/div[@class="query_div"]/*[text()=\''+alert['keyword']+'\']/../../div[@class="alert_buttons"]/span[contains(@class, "delete_button")]';
-		//utils.dump(this.getElementInfo(x(xpath)));
+		var xpath = '//*/div[@class="query_div"]/*[text()='+cleanStringForXpath(alert['keyword'])+']/../../div[@class="alert_buttons"]/span[contains(@class, "delete_button")]';		//utils.dump(this.getElementInfo(x(xpath)));
 		this.click(x(xpath));
 	});
 	this.wait(2000, function() {});
