@@ -384,15 +384,18 @@ casper.changeDropDownMultiSelect = function(indexDropdownMenu, newvalues, oldval
 */
 casper.getIndexItemByFirstLetter = function(menuname, itemwanted) {
 
-	var firstletter = itemwanted.charAt(0);
+	var firstletter = itemwanted.trimLeft().charAt(0);//trimLeft() will solve the 'space' prefix problem from 'All results'&"Only the best results"
 	var index = 0;
-	gaData[menuname].forEach(function(el){ 
-		if (el.charAt(0) == firstletter) {
+	gaData[menuname].some(function(el){ 
+		if (el.trimLeft().charAt(0) == firstletter) {
 			index += 1;
-		}
+		}    
+        if (el==itemwanted) return true;//once we get the itemwanted we stop iterating gaData
+        
+        return false;        
 	});
 
-	return index-1;
+	return index;
 }
 
 casper.changeDropDown = function(indexDropdownMenu, menuName, newvalue) {
@@ -410,7 +413,7 @@ casper.changeDropDown = function(indexDropdownMenu, menuName, newvalue) {
 	// We use the keyboard - not the mouse
 	this.then(function () {
 		var nKeypressNeeded = casper.getIndexItemByFirstLetter(menuName, newvalue);
-		var keyToPress = newvalue.charAt(0);
+		var keyToPress = newvalue.trimLeft().charAt(0);
 		this.log("Selecting right item in menu "+menuName+ " by pressing "+nKeypressNeeded+" time on "+keyToPress, "debug");
 		for (var i=1; i<=nKeypressNeeded; i++) {
 			this.sendKeys(x('(//*/div[@class="goog-inline-block goog-flat-menu-button-caption"])['+indexDropdownMenu+']'), keyToPress);
