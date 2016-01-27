@@ -290,13 +290,29 @@ casper.getCurrentAlert = function(id, keyword, rssLink, callback) {
 	return this;
 }
 
+//http://stackoverflow.com/questions/13482352/xquery-looking-for-text-with-single-quote
+function cleanStringForXpath(str)  {
+    var parts  = str.match(/[^'"]+|['"]/g);
+    parts = parts.map(function(part){
+        if (part === "'")  {
+            return '"\'"'; // output "'"
+        }
+
+        if (part === '"') {
+            return "'\"'"; // output '"'
+        }
+        return "'" + part + "'";
+    });
+    return "concat(" + parts.join(",") + ")";
+
+}
+
 casper.deleteAlert = function(alert) {
 	this.then(function(){ 
 		this.showAllAlerts();
 	});
 	this.then(function(){ 
-		var xpath = '//*/div[@class="query_div"]/*[text()=\''+alert['keyword']+'\']/../../div[@class="alert_buttons"]/span[contains(@class, "delete_button")]';
-		//utils.dump(this.getElementInfo(x(xpath)));
+		var xpath = '//*/div[@class="query_div"]/*[text()='+cleanStringForXpath(alert['keyword'])+']/../../div[@class="alert_buttons"]/span[contains(@class, "delete_button")]';		//utils.dump(this.getElementInfo(x(xpath)));
 		this.click(x(xpath));
 	});
 	this.wait(2000, function() {});
@@ -384,15 +400,18 @@ casper.changeDropDownMultiSelect = function(indexDropdownMenu, newvalues, oldval
 */
 casper.getIndexItemByFirstLetter = function(menuname, itemwanted) {
 
-	var firstletter = itemwanted.charAt(0);
+	var firstletter = itemwanted.trimLeft().charAt(0);//trimLeft() will solve the 'space' prefix problem from 'All results'&"Only the best results"
 	var index = 0;
-	gaData[menuname].forEach(function(el){ 
-		if (el.charAt(0) == firstletter) {
+	gaData[menuname].some(function(el){ 
+		if (el.trimLeft().charAt(0) == firstletter) {
 			index += 1;
-		}
+		}    
+        if (el==itemwanted) return true;//once we get the itemwanted we stop iterating gaData
+        
+        return false;        
 	});
 
-	return index-1;
+	return index;
 }
 
 casper.changeDropDown = function(indexDropdownMenu, menuName, newvalue) {
@@ -410,7 +429,7 @@ casper.changeDropDown = function(indexDropdownMenu, menuName, newvalue) {
 	// We use the keyboard - not the mouse
 	this.then(function () {
 		var nKeypressNeeded = casper.getIndexItemByFirstLetter(menuName, newvalue);
-		var keyToPress = newvalue.charAt(0);
+		var keyToPress = newvalue.trimLeft().charAt(0);
 		this.log("Selecting right item in menu "+menuName+ " by pressing "+nKeypressNeeded+" time on "+keyToPress, "debug");
 		for (var i=1; i<=nKeypressNeeded; i++) {
 			this.sendKeys(x('(//*/div[@class="goog-inline-block goog-flat-menu-button-caption"])['+indexDropdownMenu+']'), keyToPress);
